@@ -1,45 +1,90 @@
 import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
-  BookOpen, Bookmark, ChevronRight, Compass, Heart, Home, Library,
-  Menu, MessageCircle, Moon, Search, Send, Sparkles, Sun, X
+  BookOpen, Bookmark, ChevronLeft, ChevronRight, Heart, Home, Library,
+  Menu, Moon, Music2, Search, Sun, X, Play, Check
 } from "lucide-react";
 import "./styles.css";
 
-type Section = "Home" | "Bible" | "Ask" | "Prayer" | "Library";
+type Section = "Home" | "Bible" | "Hymns" | "Prayers" | "Saved";
+type Verse = { reference: string; book: string; chapter: number; verse: number; text: string; translation: "WEB" | "KJV"; theme: string };
+type Hymn = { title: string; author: string; year: string; category: string; lyrics: string[]; note: string };
+type Prayer = { title: string; category: string; scripture: string; text: string };
 
-const dailyVerse = {
-  text: "Come to me, all you who are weary and burdened, and I will give you rest.",
-  reference: "Matthew 11:28",
-  translation: "WEB",
-};
-
-const topicGroups = [
-  { title: "Faith & Spiritual Growth", topics: ["Growing in faith", "Trusting God", "Finding purpose"] },
-  { title: "Prayer & Spiritual Life", topics: ["How to pray", "Hearing God", "Gratitude"] },
-  { title: "Life & Difficult Seasons", topics: ["Anxiety and peace", "Grief and comfort", "Hope in hard times"] },
-  { title: "Relationships & Family", topics: ["Forgiveness", "Marriage and love", "Family"] },
+const verses: Verse[] = [
+  { reference: "Psalm 23:1", book: "Psalms", chapter: 23, verse: 1, text: "Yahweh is my shepherd: I shall lack nothing.", translation: "WEB", theme: "Comfort" },
+  { reference: "Psalm 46:10", book: "Psalms", chapter: 46, verse: 10, text: "Be still, and know that I am God.", translation: "WEB", theme: "Peace" },
+  { reference: "Matthew 11:28", book: "Matthew", chapter: 11, verse: 28, text: "Come to me, all you who labor and are heavily burdened, and I will give you rest.", translation: "WEB", theme: "Rest" },
+  { reference: "Proverbs 3:5", book: "Proverbs", chapter: 3, verse: 5, text: "Trust in Yahweh with all your heart, and don't lean on your own understanding.", translation: "WEB", theme: "Trust" },
+  { reference: "Isaiah 41:10", book: "Isaiah", chapter: 41, verse: 10, text: "Don't be afraid, for I am with you. Don't be dismayed, for I am your God. I will strengthen you. Yes, I will help you. Yes, I will uphold you with the right hand of my righteousness.", translation: "WEB", theme: "Courage" },
+  { reference: "John 3:16", book: "John", chapter: 3, verse: 16, text: "For God so loved the world, that he gave his one and only Son, that whoever believes in him should not perish, but have eternal life.", translation: "WEB", theme: "Love" },
+  { reference: "Philippians 4:6", book: "Philippians", chapter: 4, verse: 6, text: "In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God.", translation: "WEB", theme: "Peace" },
+  { reference: "Romans 8:28", book: "Romans", chapter: 8, verse: 28, text: "We know that all things work together for good for those who love God, to those who are called according to his purpose.", translation: "WEB", theme: "Hope" },
+  { reference: "Psalm 119:105", book: "Psalms", chapter: 119, verse: 105, text: "Your word is a lamp to my feet, and a light for my path.", translation: "WEB", theme: "Guidance" },
+  { reference: "1 Corinthians 13:4", book: "1 Corinthians", chapter: 13, verse: 4, text: "Love is patient and is kind. Love doesn't envy. Love doesn't brag, is not proud.", translation: "WEB", theme: "Love" },
+  { reference: "Joshua 1:9", book: "Joshua", chapter: 1, verse: 9, text: "Haven't I commanded you? Be strong and courageous. Don't be afraid. Don't be dismayed, for Yahweh your God is with you wherever you go.", translation: "WEB", theme: "Courage" },
+  { reference: "Psalm 34:18", book: "Psalms", chapter: 34, verse: 18, text: "Yahweh is near to those who have a broken heart, and saves those who have a crushed spirit.", translation: "WEB", theme: "Comfort" },
 ];
+
+const hymns: Hymn[] = [
+  { title: "Amazing Grace", author: "John Newton", year: "1779", category: "Grace", lyrics: ["Amazing grace! How sweet the sound,", "That saved a wretch like me!", "I once was lost, but now am found;", "Was blind, but now I see."], note: "A beloved hymn celebrating grace, redemption, and the gift of being found." },
+  { title: "Be Thou My Vision", author: "Traditional Irish; translated by Mary E. Byrne", year: "1912 translation", category: "Devotion", lyrics: ["Be Thou my Vision, O Lord of my heart;", "Naught be all else to me, save that Thou art;", "Thou my best Thought, by day or by night,", "Waking or sleeping, Thy presence my light."], note: "An old prayer of devotion asking God to guide every part of life." },
+  { title: "Holy, Holy, Holy", author: "Reginald Heber", year: "1826", category: "Worship", lyrics: ["Holy, holy, holy! Lord God Almighty!", "Early in the morning our song shall rise to Thee;", "Holy, holy, holy! Merciful and mighty!", "God in three Persons, blessed Trinity!"], note: "A hymn of reverence and praise to the Holy Trinity." },
+  { title: "What a Friend We Have in Jesus", author: "Joseph M. Scriven", year: "1855", category: "Comfort", lyrics: ["What a Friend we have in Jesus,", "All our sins and griefs to bear!", "What a privilege to carry", "Everything to God in prayer!"], note: "A reminder to bring every burden and concern to God in prayer." },
+  { title: "Praise to the Lord, the Almighty", author: "Joachim Neander", year: "1680", category: "Praise", lyrics: ["Praise to the Lord, the Almighty, the King of creation!", "O my soul, praise Him, for He is thy health and salvation!", "All ye who hear, now to His temple draw near;", "Praise Him in glad adoration."], note: "A joyful invitation to praise God for His care and creation." },
+  { title: "It Is Well with My Soul", author: "Horatio G. Spafford", year: "1873", category: "Peace", lyrics: ["When peace, like a river, attendeth my way,", "When sorrows like sea billows roll;", "Whatever my lot, Thou hast taught me to say,", "It is well, it is well, with my soul."], note: "A hymn of trust and enduring faith through sorrow and hardship." },
+];
+
+const prayers: Prayer[] = [
+  { title: "Morning Prayer", category: "Daily devotion", scripture: "Psalm 143:8", text: "Heavenly Father, thank You for the gift of a new day. Guide my thoughts, words, and actions. Help me walk in love, show kindness to those I meet, and recognise Your goodness in ordinary moments. Let my life bring honour to You. Amen." },
+  { title: "Prayer for Peace", category: "Peace & comfort", scripture: "Philippians 4:6–7", text: "Lord, quiet my heart when worry grows loud. Help me lay down what I cannot control and trust You with what lies ahead. Fill me with Your peace, steady my thoughts, and remind me that I am never beyond Your care. Amen." },
+  { title: "Prayer of Gratitude", category: "Thanksgiving", scripture: "1 Thessalonians 5:18", text: "Gracious God, open my eyes to the blessings I might overlook. Thank You for life, for love, for the people who walk beside me, and for the hope found in Your Word. Teach me to live with a grateful heart, in every season. Amen." },
+  { title: "Prayer for Strength", category: "Courage", scripture: "Isaiah 41:10", text: "Faithful Father, when I feel weak, remind me that I do not have to rely on my strength alone. Give me courage for today's responsibilities, patience for the things that take time, and wisdom for each next step. Uphold me in Your love. Amen." },
+  { title: "Evening Prayer", category: "Rest & reflection", scripture: "Psalm 4:8", text: "Lord, as this day comes to an end, I place its joys and troubles in Your hands. Forgive where I have fallen short, help me make things right where I can, and grant me peaceful rest. May I wake tomorrow with renewed hope. Amen." },
+  { title: "Prayer for Loved Ones", category: "Family & friends", scripture: "Numbers 6:24–26", text: "God of love, please watch over the people dear to me. Give them strength when days are difficult, comfort when they are hurting, wisdom for their choices, and joy in moments of goodness. Help me care for them with patience, generosity, and grace. Amen." },
+];
+
+const bookList = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "Psalms", "Proverbs", "Ecclesiastes", "Isaiah", "Jeremiah", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "Hebrews", "James", "Revelation"];
 
 function App() {
   const [section, setSection] = useState<Section>("Home");
   const [query, setQuery] = useState("");
-  const [question, setQuestion] = useState("");
-  const [showTopics, setShowTopics] = useState(false);
-  const [savedVerse, setSavedVerse] = useState(false);
+  const [saved, setSaved] = useState<string[]>([]);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [dark, setDark] = useState(false);
+  const [selectedVerse, setSelectedVerse] = useState<Verse | null>(null);
+  const [selectedHymn, setSelectedHymn] = useState<Hymn | null>(null);
+  const [selectedPrayer, setSelectedPrayer] = useState<Prayer | null>(null);
+  const [selectedBook, setSelectedBook] = useState("Psalms");
+  const [showBooks, setShowBooks] = useState(false);
 
-  const filteredTopics = useMemo(() => {
+  const filteredVerses = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return topicGroups.map(group => ({ ...group, topics: group.topics.filter(topic => !q || topic.toLowerCase().includes(q) || group.title.toLowerCase().includes(q)) })).filter(group => group.topics.length);
+    return verses.filter(v => !q || v.reference.toLowerCase().includes(q) || v.book.toLowerCase().includes(q) || v.text.toLowerCase().includes(q) || v.theme.toLowerCase().includes(q));
+  }, [query]);
+  const filteredHymns = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return hymns.filter(h => !q || h.title.toLowerCase().includes(q) || h.author.toLowerCase().includes(q) || h.category.toLowerCase().includes(q));
+  }, [query]);
+  const filteredPrayers = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return prayers.filter(p => !q || p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || p.scripture.toLowerCase().includes(q) || p.text.toLowerCase().includes(q));
   }, [query]);
 
   function navigate(next: Section) {
     setSection(next);
     setMobileMenu(false);
-    if (next === "Bible") setQuery("");
+    setQuery("");
+    setSelectedVerse(null);
+    setSelectedHymn(null);
+    setSelectedPrayer(null);
+    setShowBooks(false);
   }
+  function toggleSave(id: string) {
+    setSaved(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
+  }
+
+  const dailyVerse = verses[2];
 
   return (
     <div className={dark ? "app dark" : "app"}>
@@ -49,73 +94,65 @@ function App() {
           <div><div className="brand-name">Call2Christ</div><div className="brand-tagline">Walk with Christ. Every day.</div></div>
           <button className="icon-button close-menu" aria-label="Close menu" onClick={() => setMobileMenu(false)}><X size={19}/></button>
         </div>
-        <div className="nav-label">YOUR JOURNEY</div>
+        <div className="nav-label">YOUR DAILY COMPANION</div>
         <nav>
           {([
-            ["Home", Home], ["Bible", BookOpen], ["Ask", MessageCircle], ["Prayer", Heart], ["Library", Library],
+            ["Home", Home], ["Bible", BookOpen], ["Hymns", Music2], ["Prayers", Heart], ["Saved", Library],
           ] as const).map(([name, Icon]) => (
             <button key={name} className={section === name ? "nav-item active" : "nav-item"} onClick={() => navigate(name)}>
-              <Icon size={19}/><span>{name === "Ask" ? "Ask Call2Christ" : name}</span>{section === name && <span className="active-dot"/>}
+              <Icon size={19}/><span>{name === "Saved" ? "My collection" : name}</span>{section === name && <span className="active-dot"/>}
             </button>
           ))}
         </nav>
         <div className="sidebar-bottom">
           <div className="sidebar-verse"><span className="tiny-cross">✝</span><p>“Be still, and know that I am God.”</p><small>Psalm 46:10 · WEB</small></div>
           <button className="nav-item settings-item" onClick={() => setDark(v => !v)}>{dark ? <Sun size={18}/> : <Moon size={18}/>}<span>{dark ? "Light appearance" : "Dark appearance"}</span></button>
-          <div className="profile-row"><div className="profile-avatar">G</div><div><strong>Guest journey</strong><small>Your faith, your pace</small></div><ChevronRight size={17}/></div>
+          <div className="profile-row"><div className="profile-avatar">✝</div><div><strong>A moment with Christ</strong><small>Scripture · Hymns · Prayer</small></div><Heart size={17}/></div>
         </div>
       </aside>
-
       {mobileMenu && <button className="scrim" aria-label="Close navigation" onClick={() => setMobileMenu(false)}/>}
 
       <main className="main">
         <header className="topbar">
           <button className="icon-button mobile-menu-button" aria-label="Open menu" onClick={() => setMobileMenu(true)}><Menu size={21}/></button>
-          <div className="breadcrumb">Your journey <ChevronRight size={14}/> <strong>{section === "Ask" ? "Ask Call2Christ" : section}</strong></div>
+          <div className="breadcrumb">Call2Christ <ChevronRight size={14}/> <strong>{section === "Saved" ? "My collection" : section}</strong></div>
           <div className="top-actions">
             <button className="icon-button" aria-label="Toggle appearance" onClick={() => setDark(v => !v)}>{dark ? <Sun size={18}/> : <Moon size={18}/>}</button>
-            <button className="profile-pill" onClick={() => navigate("Library")}><span className="profile-avatar">G</span><span>Guest</span></button>
           </div>
         </header>
 
         {section === "Home" && <div className="page home-page">
-          <div className="welcome-row"><div><div className="eyebrow"><Sun size={14}/> A MOMENT WITH GOD</div><h1>A little closer to Him,<br/><em>one day at a time.</em></h1><p className="lead">Whatever today holds, you don't have to walk through it alone.</p></div><div className="sun-art" aria-hidden="true"><div className="sun-circle"/><div className="hill hill-back"/><div className="hill hill-front"/><span>✝</span></div></div>
-
+          <div className="welcome-row"><div><div className="eyebrow"><Sun size={14}/> A MOMENT WITH GOD</div><h1>Let His Word be<br/><em>your daily light.</em></h1><p className="lead">A quiet place for Scripture, timeless hymns, and prayers that draw your heart closer to Christ.</p></div><div className="sun-art" aria-hidden="true"><div className="sun-circle"/><div className="hill hill-back"/><div className="hill hill-front"/><span>✝</span></div></div>
           <section className="verse-card">
-            <div className="verse-top"><span className="verse-label"><BookOpen size={15}/> TODAY'S SCRIPTURE</span><button className={savedVerse ? "verse-save saved" : "verse-save"} onClick={() => setSavedVerse(v => !v)} aria-label={savedVerse ? "Remove bookmark" : "Save verse"}><Bookmark size={17} fill={savedVerse ? "currentColor" : "none"}/></button></div>
-            <div className="verse-text">“{dailyVerse.text}”</div>
-            <div className="verse-reference">{dailyVerse.reference} <span>· {dailyVerse.translation}</span></div>
-            <div className="verse-bottom"><span><Sparkles size={15}/> A promise of rest for the weary heart.</span><button className="text-link" onClick={() => navigate("Bible")}>Read passage <ChevronRight size={15}/></button></div>
+            <div className="verse-top"><span className="verse-label"><BookOpen size={15}/> SCRIPTURE FOR TODAY</span><button className={saved.includes("verse:"+dailyVerse.reference) ? "verse-save saved" : "verse-save"} onClick={() => toggleSave("verse:"+dailyVerse.reference)} aria-label="Save verse"><Bookmark size={17} fill={saved.includes("verse:"+dailyVerse.reference) ? "currentColor" : "none"}/></button></div>
+            <div className="verse-text">“{dailyVerse.text}”</div><div className="verse-reference">{dailyVerse.reference} <span>· {dailyVerse.translation}</span></div>
+            <div className="verse-bottom"><span><Heart size={15}/> Take a breath. Be still. Rest in His promise.</span><button className="text-link" onClick={() => {setSection("Bible");setSelectedVerse(dailyVerse);}}>Read Scripture <ChevronRight size={15}/></button></div>
           </section>
-
-          <section className="ask-card">
-            <div className="ask-icon"><MessageCircle size={21}/></div>
-            <div className="ask-copy"><h2>What's on your heart?</h2><p>Ask a question, explore Scripture, or find a little clarity for the road ahead.</p></div>
-            <form className="ask-form" onSubmit={e => {e.preventDefault(); if(question.trim()) {setQuery(question); setSection("Ask");}}}>
-              <input value={question} onChange={e => setQuestion(e.target.value)} placeholder="Ask anything about faith, life, or the Bible…" aria-label="Ask Call2Christ a question"/>
-              <button type="submit" aria-label="Submit question"><Send size={17}/></button>
-            </form>
-            <div className="suggestions"><span>TRY ASKING</span>{["How can I find peace?", "Help me understand grace"].map(q => <button key={q} onClick={() => {setQuestion(q);setQuery(q);setSection("Ask");}}>{q}</button>)}</div>
-          </section>
-
-          <div className="section-heading"><div><div className="eyebrow">EXPLORE AT YOUR PACE</div><h2>Where would you like to begin?</h2></div><button className="text-link" onClick={() => setShowTopics(v => !v)}>{showTopics ? "Show less" : "View all topics"} <ChevronRight size={15}/></button></div>
+          <div className="section-heading"><div><div className="eyebrow">A LIBRARY FOR THE SOUL</div><h2>Spend a moment with the Word</h2></div></div>
           <div className="quick-grid">
-            <button className="quick-card bible-quick" onClick={() => navigate("Bible")}><span className="quick-icon"><BookOpen size={20}/></span><strong>Read the Bible</strong><span>Find a passage and spend time in the Word.</span><ChevronRight size={17}/></button>
-            <button className="quick-card prayer-quick" onClick={() => navigate("Prayer")}><span className="quick-icon"><Heart size={20}/></span><strong>Make space to pray</strong><span>Bring your thoughts, thanks, and worries to God.</span><ChevronRight size={17}/></button>
-            <button className="quick-card topics-quick" onClick={() => setShowTopics(v => !v)}><span className="quick-icon"><Compass size={20}/></span><strong>Explore a life topic</strong><span>Discover what Scripture says about real life.</span><ChevronRight size={17}/></button>
+            <button className="quick-card bible-quick" onClick={() => navigate("Bible")}><span className="quick-icon"><BookOpen size={20}/></span><strong>The Holy Bible</strong><span>Find verses for every season of life.</span><ChevronRight size={17}/></button>
+            <button className="quick-card prayer-quick" onClick={() => navigate("Hymns")}><span className="quick-icon"><Music2 size={20}/></span><strong>Hymns of faith</strong><span>Return to the songs generations have cherished.</span><ChevronRight size={17}/></button>
+            <button className="quick-card topics-quick" onClick={() => navigate("Prayers")}><span className="quick-icon"><Heart size={20}/></span><strong>Prayers for every day</strong><span>Words for gratitude, comfort, and hope.</span><ChevronRight size={17}/></button>
           </div>
-          {showTopics && <section className="topics-panel"><div className="search-box"><Search size={17}/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search topics…" aria-label="Search topics"/></div><div className="topic-groups">{filteredTopics.map(group => <div key={group.title}><h3>{group.title}</h3><div className="topic-chips">{group.topics.map(topic => <button key={topic} onClick={() => {setQuestion(topic);setQuery(topic);setSection("Ask");}}>{topic}<ChevronRight size={13}/></button>)}</div></div>)}</div></section>}
+          <div className="section-heading"><div><div className="eyebrow">A LITTLE ENCOURAGEMENT</div><h2>Words to carry with you</h2></div><button className="text-link" onClick={() => navigate("Bible")}>More verses <ChevronRight size={15}/></button></div>
+          <div className="encouragement-grid">{verses.slice(0,3).map(v=><button className="encouragement-card" key={v.reference} onClick={()=>{setSection("Bible");setSelectedVerse(v);}}><span>{v.theme}</span><p>“{v.text}”</p><strong>{v.reference} <ChevronRight size={14}/></strong></button>)}</div>
         </div>}
 
-        {section === "Bible" && <div className="page sub-page"><div className="eyebrow"><BookOpen size={14}/> SCRIPTURE, AT YOUR PACE</div><h1>Open the <em>Word.</em></h1><p className="lead">Make room for truth, wisdom, and a moment of quiet.</p><div className="search-box bible-search"><Search size={18}/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search a verse, book, or phrase…" aria-label="Search Bible"/><button onClick={() => setSection("Ask")}>Explore</button></div><div className="notice-card"><BookOpen size={22}/><div><strong>Your Bible library is being connected.</strong><p>The reading interface is ready for the verified Scripture database. We will connect the full text only after confirming translation and licensing details.</p></div></div><h2>Begin with a book</h2><div className="book-grid">{["Genesis","Psalms","Proverbs","Isaiah","Matthew","Mark","Luke","John","Romans","Ephesians","Philippians","Revelation"].map((book,i)=><button key={book} onClick={() => setQuery(book)}><span>{String(i+1).padStart(2,"0")}</span><strong>{book}</strong><ChevronRight size={16}/></button>)}</div></div>}
+        {section === "Bible" && <div className="page sub-page">
+          <div className="eyebrow"><BookOpen size={14}/> SCRIPTURE LIBRARY</div><h1>Return to the <em>Word.</em></h1><p className="lead">Search a passage or explore verses for encouragement, hope, strength, and peace.</p>
+          <div className="search-box bible-search"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search by reference, word, or theme…" aria-label="Search Scripture"/><button onClick={()=>setQuery("")}>Clear</button></div>
+          {selectedVerse ? <div className="reader-card"><button className="back-link" onClick={()=>setSelectedVerse(null)}><ChevronLeft size={16}/> All verses</button><span className="verse-label">SCRIPTURE · {selectedVerse.translation}</span><h2>{selectedVerse.reference}</h2><p className="reader-verse">“{selectedVerse.text}”</p><div className="reader-actions"><button className="primary-button" onClick={()=>toggleSave("verse:"+selectedVerse.reference)}>{saved.includes("verse:"+selectedVerse.reference)?<Check size={16}/>:<Bookmark size={16}/>} {saved.includes("verse:"+selectedVerse.reference)?"Saved":"Save verse"}</button><span>{selectedVerse.theme}</span></div></div> :
+          <><div className="content-count">{filteredVerses.length} featured passages <span>· {bookList.length} books listed below</span></div><div className="verse-list">{filteredVerses.map(v=><article className="verse-row" key={v.reference}><button className="verse-open" onClick={()=>setSelectedVerse(v)}><span className="verse-label">{v.theme.toUpperCase()}</span><strong>{v.reference}</strong><p>{v.text}</p><small>{v.translation} · {v.book} {v.chapter}:{v.verse}</small></button><button className={saved.includes("verse:"+v.reference)?"row-save saved":"row-save"} onClick={()=>toggleSave("verse:"+v.reference)} aria-label={"Save "+v.reference}><Bookmark size={17} fill={saved.includes("verse:"+v.reference)?"currentColor":"none"}/></button></article>)}</div><button className="outline-button book-toggle" onClick={()=>setShowBooks(v=>!v)}>{showBooks?"Hide book list":"Browse Bible books"} <ChevronRight size={16}/></button>{showBooks&&<div className="book-grid">{bookList.map((book,i)=><button key={book} onClick={()=>setQuery(book)}><span>{String(i+1).padStart(2,"0")}</span><strong>{book}</strong><ChevronRight size={16}/></button>)}</div>}</>}
+          <div className="library-note"><strong>Building the complete Bible library</strong><p>This preview contains selected passages, not the complete Bible text. The full book, chapter, and verse library will be connected after the source database and translation permissions are verified.</p></div>
+        </div>}
 
-        {section === "Ask" && <div className="page sub-page"><div className="eyebrow"><Sparkles size={14}/> SCRIPTURE-FIRST GUIDANCE</div><h1>Let's explore this <em>together.</em></h1><p className="lead">Bring your question as you are. We'll begin with Scripture and move gently toward understanding and next steps.</p><div className="notice-card"><Heart size={22}/><div><strong>A thoughtful answer starts with trusted sources.</strong><p>The question experience is being prepared. Before live answers are enabled, it must be connected to verified Bible passages and tested to ensure it never invents Scripture references.</p></div></div><form className="ask-form standalone" onSubmit={e=>{e.preventDefault();setQuestion("");}}><input value={question || query} onChange={e=>{setQuestion(e.target.value);setQuery(e.target.value);}} placeholder="What is on your heart today?" aria-label="Your question"/><button type="submit" aria-label="Send question"><Send size={17}/></button></form><div className="suggestion-list"><span>YOU COULD EXPLORE</span>{["What does the Bible say about worry?","How can I forgive someone?","Where can I find hope in a difficult season?"].map(q=><button key={q} onClick={()=>{setQuestion(q);setQuery(q);}}><MessageCircle size={17}/>{q}<ChevronRight size={16}/></button>)}</div></div>}
+        {section === "Hymns" && <div className="page sub-page"><div className="eyebrow"><Music2 size={14}/> HYMNS OF FAITH</div><h1>Songs that lift the <em>soul.</em></h1><p className="lead">Timeless words of praise, trust, grace, and hope, cherished by generations of believers.</p><div className="search-box bible-search"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search hymns or authors…" aria-label="Search hymns"/><button onClick={()=>setQuery("")}>Clear</button></div>{selectedHymn?<div className="reader-card hymn-reader"><button className="back-link" onClick={()=>setSelectedHymn(null)}><ChevronLeft size={16}/> All hymns</button><div className="hymn-emblem"><Music2 size={24}/></div><span className="verse-label">{selectedHymn.category.toUpperCase()}</span><h2>{selectedHymn.title}</h2><p className="hymn-meta">{selectedHymn.author} · {selectedHymn.year}</p><div className="hymn-lyrics">{selectedHymn.lyrics.map((line,i)=><p key={i}>{line}</p>)}</div><p className="hymn-note">{selectedHymn.note}</p><button className="primary-button" onClick={()=>toggleSave("hymn:"+selectedHymn.title)}>{saved.includes("hymn:"+selectedHymn.title)?<Check size={16}/>:<Bookmark size={16}/>} {saved.includes("hymn:"+selectedHymn.title)?"Saved to collection":"Save hymn"}</button></div>:<><div className="content-count">{filteredHymns.length} hymns in this starter collection <span>· Lyrics shown are excerpts</span></div><div className="hymn-grid">{filteredHymns.map((h,i)=><button className="hymn-card" key={h.title} onClick={()=>setSelectedHymn(h)}><span className="hymn-number">{String(i+1).padStart(2,"0")} <Music2 size={16}/></span><strong>{h.title}</strong><small>{h.author}</small><p>{h.note}</p><span className="hymn-open">Read hymn <ChevronRight size={14}/></span></button>)}</div></>}<div className="library-note"><strong>Growing the hymn collection responsibly</strong><p>Only verified public-domain lyrics or appropriately licensed material should be included in the full library. This starter view shows excerpts, not complete hymn books or recordings.</p></div></div>}
 
-        {section === "Prayer" && <div className="page sub-page"><div className="eyebrow"><Heart size={14}/> A QUIET PLACE</div><h1>Come as <em>you are.</em></h1><p className="lead">You don't need perfect words. Begin with what's on your heart.</p><div className="prayer-paper"><div className="paper-flower">✦</div><h2>A simple prayer for today</h2><p>Heavenly Father, meet me in this moment. Quiet the noise around me and within me. Give me wisdom for what I cannot understand, courage for what I must face, and a heart that remains open to Your love. Guide my next step, and help me walk in grace today. Amen.</p><span>Make this prayer your own.</span></div><label className="field-label" htmlFor="prayer-notes">My prayer notes</label><textarea id="prayer-notes" placeholder="Write a private prayer or reflection here…"></textarea><p className="privacy-note">Privacy matters. Prayer notes are not saved to an account or server in this initial preview.</p></div>}
+        {section === "Prayers" && <div className="page sub-page"><div className="eyebrow"><Heart size={14}/> PRAYER LIBRARY</div><h1>Words for your <em>quiet moments.</em></h1><p className="lead">Simple prayers for the beginning of a day, a moment of gratitude, or a season when you need strength.</p><div className="search-box bible-search"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search prayers or themes…" aria-label="Search prayers"/><button onClick={()=>setQuery("")}>Clear</button></div>{selectedPrayer?<div className="reader-card prayer-reader"><button className="back-link" onClick={()=>setSelectedPrayer(null)}><ChevronLeft size={16}/> All prayers</button><div className="hymn-emblem"><Heart size={23}/></div><span className="verse-label">{selectedPrayer.category.toUpperCase()}</span><h2>{selectedPrayer.title}</h2><div className="prayer-scripture">A Scripture to reflect on · {selectedPrayer.scripture}</div><p className="prayer-full-text">{selectedPrayer.text}</p><button className="primary-button" onClick={()=>toggleSave("prayer:"+selectedPrayer.title)}>{saved.includes("prayer:"+selectedPrayer.title)?<Check size={16}/>:<Bookmark size={16}/>} {saved.includes("prayer:"+selectedPrayer.title)?"Saved to collection":"Save prayer"}</button></div>:<><div className="content-count">{filteredPrayers.length} prayers in this starter collection</div><div className="prayer-grid">{filteredPrayers.map(p=><button className="prayer-card" key={p.title} onClick={()=>setSelectedPrayer(p)}><span className="prayer-card-icon"><Heart size={18}/></span><span className="verse-label">{p.category.toUpperCase()}</span><strong>{p.title}</strong><p>{p.text}</p><small>Reflect on {p.scripture}</small><span className="hymn-open">Read prayer <ChevronRight size={14}/></span></button>)}</div></>}</div>}
 
-        {section === "Library" && <div className="page sub-page"><div className="eyebrow"><Library size={14}/> YOUR PERSONAL SPACE</div><h1>Keep what <em>speaks to you.</em></h1><p className="lead">A place for verses, reflections, and prayers you want to return to.</p><div className="notice-card"><Bookmark size={22}/><div><strong>Your personal library starts here.</strong><p>Saved items will be linked to secure sign-in and private storage before they are persisted. Your spiritual notes should remain yours.</p></div></div>{savedVerse && <div className="saved-item"><BookOpen size={20}/><div><strong>{dailyVerse.reference}</strong><p>{dailyVerse.text}</p></div><button onClick={()=>setSavedVerse(false)} aria-label="Remove saved verse"><X size={17}/></button></div>}<button className="primary-button" onClick={()=>navigate("Bible")}>Explore Scripture <ChevronRight size={16}/></button></div>}
+        {section === "Saved" && <div className="page sub-page"><div className="eyebrow"><Library size={14}/> YOUR COLLECTION</div><h1>Keep close what <em>encourages you.</em></h1><p className="lead">A personal collection of saved Bible verses, hymns, and prayers in this session.</p>{saved.length===0?<div className="empty-state"><Bookmark size={28}/><h2>Your collection starts here.</h2><p>Save a verse, hymn, or prayer and it will appear here while this preview is open.</p><button className="primary-button" onClick={()=>navigate("Bible")}>Explore Scripture <ChevronRight size={16}/></button></div>:<div className="saved-list">{saved.map(id=>{const [kind,...rest]=id.split(":");const name=rest.join(":");const verse=verses.find(v=>v.reference===name);const hymn=hymns.find(h=>h.title===name);const prayer=prayers.find(p=>p.title===name);return <article className="saved-item" key={id}><div className="saved-type">{kind==="verse"?<BookOpen size={18}/>:kind==="hymn"?<Music2 size={18}/>:<Heart size={18}/>}</div><div><span className="verse-label">{kind.toUpperCase()}</span><strong>{verse?.reference||hymn?.title||prayer?.title||name}</strong><p>{verse?.text||hymn?.note||prayer?.text||""}</p><button className="text-link" onClick={()=>{if(verse){setSection("Bible");setSelectedVerse(verse);}else if(hymn){setSection("Hymns");setSelectedHymn(hymn);}else if(prayer){setSection("Prayers");setSelectedPrayer(prayer);}}}>Open <ChevronRight size={14}/></button></div><button className="row-save" onClick={()=>toggleSave(id)} aria-label="Remove from saved"><X size={16}/></button></article>})}</div>}<p className="privacy-note">This first preview keeps saved items in temporary app state only. Secure cross-device saving will be added later.</p></div>}
 
-        <footer className="footer"><span>✝</span><span>Made for the journey, grounded in the Word.</span><span>Call2Christ · Preview</span></footer>
+        <footer className="footer"><span>✝</span><span>Scripture for the day. Hope for the journey.</span><span>Call2Christ · Starter library</span></footer>
       </main>
     </div>
   );
