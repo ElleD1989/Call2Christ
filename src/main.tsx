@@ -70,12 +70,25 @@ function App() {
     let cancelled = false;
 
     async function loadPublishedScripture() {
-      const { data, error } = await client
-        .from("bible_verses")
-        .select("book_code, chapter, verse, text, translations!inner(code), bible_books!inner(name, sort_order)")
-        .eq("is_published", true);
+      // Supabase REST responses are paginated; load every published verse in bounded batches.
+      const pageSize = 1000;
+      const allRows: unknown[] = [];
+      for (let from = 0; !cancelled; from += pageSize) {
+        const { data, error } = await client
+          .from("bible_verses")
+          .select("book_code, chapter, verse, text, translations!inner(code), bible_books!inner(name, sort_order)")
+          .eq("is_published", true)
+          .order("book_code", { ascending: true })
+          .order("chapter", { ascending: true })
+          .order("verse", { ascending: true })
+          .range(from, from + pageSize - 1);
 
-      if (error || !data || cancelled) return;
+        if (error || !data) return;
+        allRows.push(...data);
+        if (data.length < pageSize) break;
+      }
+
+      if (cancelled || allRows.length === 0) return;
 
       type ScriptureRow = {
         book_code: string;
@@ -86,7 +99,7 @@ function App() {
         bible_books: { name: string; sort_order: number } | { name: string; sort_order: number }[];
       };
 
-      const rows = data as unknown as ScriptureRow[];
+      const rows = allRows as ScriptureRow[];
       const loaded = rows
         .map((row): Verse => {
           const book = Array.isArray(row.bible_books) ? row.bible_books[0] : row.bible_books;
