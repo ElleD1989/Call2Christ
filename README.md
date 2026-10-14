@@ -1,24 +1,25 @@
 # Call2Christ
 
-**Walk with Christ. Every day.**
+**Scripture for the day. Hope for the journey.**
 
-Call2Christ is a Scripture-centred Christian companion intended to help people move from **Question → Scripture → Understanding → Reflection → Prayer → Action → Spiritual Growth**.
+Call2Christ is a quiet, Scripture-centred companion for Christ lovers and devotees. The initial product is a curated library of Bible passages, traditional hymns, prayers, and daily encouragement—not a question-and-answer chatbot.
 
-## Current foundation
-
-This repository now contains the first runnable frontend foundation:
+## Current frontend foundation
 
 - React + TypeScript + Vite.
-- Warm Dawn design direction: cream, muted gold, deep ink, Spectral headings and DM Sans interface text.
-- Responsive navigation and initial Home, Bible, Ask, Prayer and Library experiences.
-- Topic discovery interactions and a daily Scripture presentation.
-- Explicit notices where live data or server functionality is not connected yet.
+- Warm Dawn design system, responsive navigation, and light/dark appearance.
+- Home screen with daily Scripture and encouragement.
+- Starter Bible passage browser with search and saved verses.
+- Starter hymn library with searchable entries and selected lyric excerpts.
+- Prayer library with searchable prayers and related Scripture references.
+- Session-only personal collection for saved verses, hymns, and prayers.
+- Product and licensing notes for connecting the complete content libraries.
 
 ## Important status distinction
 
-This is an initial frontend scaffold, not a production-ready app. The Bible and Ask screens are not yet connected to a verified Scripture corpus or retrieval service. Prayer notes are not persisted. Authentication, secure personal storage, server functions, testing and deployment remain to be implemented and verified.
+This is an initial frontend scaffold with sample content. It is **not yet a complete Bible, hymn book, production-ready app, or deployed service**. The current Bible screen includes selected passages, not all 66 books and chapters. Hymns are shown as selected excerpts, not complete hymn books. Saved items currently live only in app state and are not securely persisted.
 
-Earlier project updates reported a KJV + WEB corpus of 62,197 verses and a set of topics in a Lovable environment. The Supabase project previously inspected through the connected tools showed a different schema and only a small verse sample. Treat the corpus as **unverified in this repository** until the intended database is identified and its coverage, translation metadata and licensing are checked.
+A previous project update reported KJV + World English Bible (WEB) content with 62,197 verses in a Lovable environment. The Supabase project previously inspected through the connected tools showed a different schema and only a small verse sample. The intended content database must be identified and validated before claiming full Bible coverage.
 
 ## Run locally
 
@@ -36,20 +37,21 @@ npm run build
 npm run preview
 ```
 
-## Planned implementation sequence
+## Implementation sequence
 
-1. Verify and connect the intended Supabase project without destructive changes.
-2. Validate Bible translation data, verse counts, references, attribution and licensing.
-3. Implement Scripture search and book/chapter/verse reading backed by the database.
-4. Build Ask Call2Christ as retrieval-grounded server-side functionality with references and safety handling.
-5. Add authentication and private bookmarks, notes, prayer journal and reading progress with row-level security.
-6. Add automated checks, accessibility review, responsive testing and deployment configuration.
+1. Identify and verify the intended database without destructive changes.
+2. Validate Bible translations, complete verse coverage, attribution, and distribution/commercial permissions.
+3. Connect full Bible navigation and reference/keyword search.
+4. Build a structured hymn library using public-domain or properly licensed lyrics and recordings.
+5. Expand the prayer library and Scripture references.
+6. Add persistent personal collections, with authentication and database-level privacy protections where needed.
+7. Add content management, automated tests, accessibility review, and deployment.
 
 ## Product principles
 
-- Scripture is the foundation; AI explains retrieved passages rather than inventing biblical authority.
-- Welcoming, compassionate and usable for people at different stages of faith.
-- Respect privacy and the sensitivity of spiritual conversations.
-- Provide appropriate real-world support for crisis, medical, abuse and mental-health situations.
-- Respect Bible translation licensing and commercial-use restrictions.
-- No feature should be labelled complete until it works and has been verified.
+- Calm, devotional, encouraging, and Scripture-centred.
+- Core experience first: Bible, hymns, prayers, and daily encouragement.
+- No public question-and-answer feature in the initial version.
+- Future community features such as testimonies can be considered after the core library is complete.
+- Respect translation and hymn copyright/licensing.
+- Never describe a sample or placeholder collection as complete.
