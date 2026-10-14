@@ -2,73 +2,76 @@
 
 ## Mission
 
-Build a comprehensive, modern, welcoming, spiritually grounded Christian application that helps people connect with God, understand the Bible, find biblical guidance, grow in faith, pray, learn and apply Scripture to everyday life.
+Create a beautiful, welcoming digital library for Christ lovers and devotees, centred on Bible passages, hymns, prayers, and daily encouragement.
 
-Call2Christ should feel like a living Christian companion, not merely a static Bible database or a collection of articles.
+Call2Christ should feel like a quiet companion for daily devotion—not a chatbot or a social network in its initial release.
 
-## Central journey
+## Initial product journey
 
-**Question → Scripture → Understanding → Reflection → Prayer → Action → Spiritual Growth**
+**Daily Encouragement → Scripture → Hymn → Prayer → Reflection**
 
-## Core principles
+## MVP priorities
 
-- Bible-first and Scripture-centred.
-- Accessible to curious visitors, new believers, mature Christians and people in difficult seasons.
-- Welcoming rather than intimidating.
-- Compassionate without replacing pastors, qualified professionals or emergency services.
-- Structured and scalable rather than dependent on hard-coded content.
-- Privacy-conscious, particularly around questions, prayers and personal reflections.
-- Internationally extensible while respecting each translation's rights and licensing.
+### 1. Home / Daily encouragement
+- Verse or short Scripture passage for the day.
+- Brief, carefully reviewed encouragement rooted in the selected passage.
+- Simple entry points to the Bible, hymns, and prayers.
+- A calm and accessible reading experience.
 
-## MVP experience
+### 2. Bible library
+- Navigate all 66 books, chapters, and verses.
+- Search by Bible reference, word, or phrase.
+- Display translation name and verse reference clearly.
+- Save selected verses to a personal collection.
+- Link related passages where reliable relationships are available.
 
-### Home / Today
-- Scripture of the day and reflection.
-- Continue reading and suggested topics.
-- A clear entry point to Ask Call2Christ.
-- Quick access to Bible, prayer and personal library.
+### 3. Hymn library
+- Browse and search hymn titles, authors, themes, and categories.
+- Show hymn background and lyrics where the rights permit.
+- Clearly distinguish public-domain texts from licensed works.
+- Audio and recordings can be considered later after their rights and hosting requirements are confirmed.
 
-### Bible
-- Navigate Testament, book, chapter and verse.
-- Search references, phrases and keywords.
-- Save bookmarks, highlights and notes after secure persistence is implemented.
-- Link related passages and themes.
-- Show translation and licensing information accurately.
+### 4. Prayer library
+- Browse prayers by purpose, such as morning, evening, gratitude, peace, courage, comfort, and loved ones.
+- Include a relevant Scripture reference with each prayer where appropriate.
+- Keep the tone reverent, gentle, and welcoming.
+- Private prayer notes can be considered after secure storage is implemented.
 
-### Ask Call2Christ
-- Accept natural-language questions.
-- Retrieve passages from the verified Bible database before composing answers.
-- Present Scripture references, context, explanation, reflection prompts, prayer and related topics.
-- Never fabricate a verse, reference or claim that an answer is God's direct instruction.
-- Respect denominational differences where Christians interpret a passage differently.
-- Apply safe response patterns for crisis, abuse, self-harm, health and other high-stakes situations.
+### 5. Personal collection
+- Save Bible passages, hymns, and prayers.
+- Later add secure account-based syncing and privacy controls.
+- For the first preview, saved items are temporary and not persisted to a server.
 
-### Topics and structured knowledge
-Organise discovery across Faith & Spiritual Growth; Prayer & Spiritual Life; Emotional & Personal Life; Relationships & Family; Life & Purpose; and Difficult Seasons. Over time, connect topics to passages, biblical people and places, events, themes, concepts, parables, miracles, prayers, covenants, prophecies and timelines.
+## Future possibilities (not MVP requirements)
 
-### Prayer and personal library
-- Private prayer journal and optional status tracking.
-- Scripture-informed prayer prompts.
-- Bookmarks, notes, saved answers, saved studies and reading history.
-- Secure authentication and database-level access controls before syncing private data.
+- Sharing testimonies and faith stories.
+- Optional community interaction and moderation.
+- Audio Bible and hymn recordings.
+- Reading plans, devotional series, additional languages, and accessibility preferences.
+
+No open-ended question-and-answer feature is planned for the initial version.
+
+## Design direction
+
+Warm Dawn: cream backgrounds, muted gold accents, deep ink text, Spectral headings and DM Sans interface text. The interface should be mobile responsive, uncluttered, easy to read, and comfortable for longer periods of devotional reading.
 
 ## Technical direction
 
 - React + TypeScript + Vite frontend.
-- Supabase for relational content, authentication and private user data, subject to verification of the intended existing project.
-- Data-driven content models, indexes for search, server-side AI keys and retrieval.
-- Row-level security for personal records.
-- Responsive mobile-first interface and accessible reading typography.
+- Supabase is a candidate for content storage, subject to verifying the intended existing project.
+- Content must be data-driven rather than hard-coded in UI components.
+- Private collections require appropriate authentication and database-level access controls before cloud persistence.
+- No secrets should be shipped in browser code.
 
-## Data integrity gate
+## Content integrity and licensing
 
-A prior status report described KJV and World English Bible (WEB) content with 62,197 verses. A separate live Supabase audit found a conflicting state. This must be reconciled before connecting Bible reading or Ask features. Confirm:
-1. Exact backend/project identity and environment.
-2. Translation IDs, full verse coverage and referential integrity.
-3. Translation text and permission for intended distribution/use.
-4. Search performance and citation correctness.
-5. Backups and migration history before any schema changes.
+A previous status report described a KJV + World English Bible (WEB) corpus of 62,197 verses. A separate live Supabase audit found a conflicting state. Before connecting the full library, confirm:
+1. Exact backend and environment.
+2. All books, chapters, verses, and reference consistency.
+3. Translation metadata and rights for intended distribution and commercial use.
+4. Hymn lyric rights and any separate audio/recording rights.
+5. Backups and migration history before changing an existing database.
 
 ## Definition of ready
 
-A feature is ready only when it is implemented, connected to the intended data/services, tested for normal and failure cases, accessible on mobile and desktop, and accurately described in the interface. A visual mockup alone is not a working feature.
+A library is complete only when its actual content coverage has been measured and verified. A visual list of books or a small selection of passages must not be presented as a complete Bible. A feature is ready only after its data source, normal and error states, mobile layout, accessibility, and persistence behaviour have been tested.
