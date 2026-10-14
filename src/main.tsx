@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   BookOpen, Bookmark, ChevronLeft, ChevronRight, Heart, Home, Library,
-  Menu, Moon, Music2, Search, Sun, X, Play, Check
+  Menu, Moon, Music2, Search, Sun, X, Check
 } from "lucide-react";
 import "./styles.css";
 
