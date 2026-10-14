@@ -55,7 +55,6 @@ function App() {
   const [selectedVerse, setSelectedVerse] = useState<Verse | null>(null);
   const [selectedHymn, setSelectedHymn] = useState<Hymn | null>(null);
   const [selectedPrayer, setSelectedPrayer] = useState<Prayer | null>(null);
-  const [selectedBook, setSelectedBook] = useState("Psalms");
   const [showBooks, setShowBooks] = useState(false);
 
   const filteredVerses = useMemo(() => {
