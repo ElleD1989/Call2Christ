@@ -120,7 +120,7 @@ function App() {
   const filteredVerses = useMemo(() => {
     const q = query.trim().toLowerCase();
     return verses.filter(v => !q || v.reference.toLowerCase().includes(q) || v.book.toLowerCase().includes(q) || v.text.toLowerCase().includes(q) || v.theme.toLowerCase().includes(q));
-  }, [query]);
+  }, [query, verses]);
   const filteredHymns = useMemo(() => {
     const q = query.trim().toLowerCase();
     return hymns.filter(h => !q || h.title.toLowerCase().includes(q) || h.author.toLowerCase().includes(q) || h.category.toLowerCase().includes(q));
@@ -143,7 +143,7 @@ function App() {
     setSaved(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
   }
 
-  const dailyVerse = verses[2];
+  const dailyVerse = verses.find(v => v.reference === "Matthew 11:28") ?? verses[0] ?? sampleVerses[2];
 
   return (
     <div className={dark ? "app dark" : "app"}>
