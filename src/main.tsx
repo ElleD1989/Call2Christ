@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 import { createRoot } from "react-dom/client";
 import {
   BookOpen, Bookmark, ChevronLeft, ChevronRight, Heart, Home, Library,
@@ -11,7 +12,7 @@ type Verse = { reference: string; book: string; chapter: number; verse: number; 
 type Hymn = { title: string; author: string; year: string; category: string; lyrics: string[]; note: string };
 type Prayer = { title: string; category: string; scripture: string; text: string };
 
-const verses: Verse[] = [
+const sampleVerses: Verse[] = [
   { reference: "Psalm 23:1", book: "Psalms", chapter: 23, verse: 1, text: "Yahweh is my shepherd: I shall lack nothing.", translation: "WEB", theme: "Comfort" },
   { reference: "Psalm 46:10", book: "Psalms", chapter: 46, verse: 10, text: "Be still, and know that I am God.", translation: "WEB", theme: "Peace" },
   { reference: "Matthew 11:28", book: "Matthew", chapter: 11, verse: 28, text: "Come to me, all you who labor and are heavily burdened, and I will give you rest.", translation: "WEB", theme: "Rest" },
@@ -48,6 +49,8 @@ const bookList = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "J
 
 function App() {
   const [section, setSection] = useState<Section>("Home");
+  const [verses, setVerses] = useState<Verse[]>(sampleVerses);
+  const [scriptureSource, setScriptureSource] = useState<"sample" | "database">("sample");
   const [query, setQuery] = useState("");
   const [saved, setSaved] = useState<string[]>([]);
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -56,6 +59,63 @@ function App() {
   const [selectedHymn, setSelectedHymn] = useState<Hymn | null>(null);
   const [selectedPrayer, setSelectedPrayer] = useState<Prayer | null>(null);
   const [showBooks, setShowBooks] = useState(false);
+
+  useEffect(() => {
+    const url = import.meta.env.VITE_SUPABASE_URL;
+    const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !publishableKey) return;
+
+    const client = createClient(url, publishableKey);
+    let cancelled = false;
+
+    async function loadPublishedScripture() {
+      const { data, error } = await client
+        .from("bible_verses")
+        .select("book_code, chapter, verse, text, translations!inner(code), bible_books!inner(name, sort_order)")
+        .eq("is_published", true);
+
+      if (error || !data || cancelled) return;
+
+      type ScriptureRow = {
+        book_code: string;
+        chapter: number;
+        verse: number;
+        text: string;
+        translations: { code: string } | { code: string }[];
+        bible_books: { name: string; sort_order: number } | { name: string; sort_order: number }[];
+      };
+
+      const rows = data as unknown as ScriptureRow[];
+      const loaded = rows
+        .map((row): Verse => {
+          const book = Array.isArray(row.bible_books) ? row.bible_books[0] : row.bible_books;
+          const translation = Array.isArray(row.translations) ? row.translations[0] : row.translations;
+          return {
+            reference: `${book.name} ${row.chapter}:${row.verse}`,
+            book: book.name,
+            chapter: row.chapter,
+            verse: row.verse,
+            text: row.text,
+            translation: translation.code === "KJV" ? "KJV" : "WEB",
+            theme: "Scripture",
+          };
+        })
+        .sort((a, b) => {
+          const bookOrder = sampleVerses.findIndex((v) => v.book === a.book) - sampleVerses.findIndex((v) => v.book === b.book);
+          return bookOrder || a.chapter - b.chapter || a.verse - b.verse;
+        });
+
+      if (loaded.length > 0 && !cancelled) {
+        setVerses(loaded);
+        setScriptureSource("database");
+      }
+    }
+
+    void loadPublishedScripture();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredVerses = useMemo(() => {
     const q = query.trim().toLowerCase();
