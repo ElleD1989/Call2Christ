@@ -172,7 +172,7 @@ function App() {
   const filteredPrayers = useMemo(() => {
     const q = query.trim().toLowerCase();
     return prayers.filter(p => !q || p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || p.scripture.toLowerCase().includes(q) || p.text.toLowerCase().includes(q));
-  }, [query]);
+  }, [query, prayers]);
 
   function navigate(next: Section) {
     setSection(next);
