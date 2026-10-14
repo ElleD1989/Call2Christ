@@ -106,7 +106,16 @@ function App() {
         });
 
       if (loaded.length > 0 && !cancelled) {
-        setVerses(loaded);
+        // Keep the curated starter passages visible until the complete Bible import is verified.
+        // Database records take precedence when the same reference exists in both sources.
+        const byReference = new Map<string, Verse>();
+        sampleVerses.forEach(verse => byReference.set(verse.reference, verse));
+        loaded.forEach(verse => byReference.set(verse.reference, verse));
+        const merged = Array.from(byReference.values()).sort((a, b) => {
+          const bookOrder = bookList.indexOf(a.book) - bookList.indexOf(b.book);
+          return bookOrder || a.chapter - b.chapter || a.verse - b.verse;
+        });
+        setVerses(merged);
         setScriptureSource("database");
       }
     }
@@ -201,7 +210,7 @@ function App() {
           <div className="eyebrow"><BookOpen size={14}/> SCRIPTURE LIBRARY</div><h1>Return to the <em>Word.</em></h1><p className="lead">Search a passage or explore verses for encouragement, hope, strength, and peace.</p>
           <div className="search-box bible-search"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search by reference, word, or theme…" aria-label="Search Scripture"/><button onClick={()=>setQuery("")}>Clear</button></div>
           {selectedVerse ? <div className="reader-card"><button className="back-link" onClick={()=>setSelectedVerse(null)}><ChevronLeft size={16}/> All verses</button><span className="verse-label">SCRIPTURE · {selectedVerse.translation}</span><h2>{selectedVerse.reference}</h2><p className="reader-verse">“{selectedVerse.text}”</p><div className="reader-actions"><button className="primary-button" onClick={()=>toggleSave("verse:"+selectedVerse.reference)}>{saved.includes("verse:"+selectedVerse.reference)?<Check size={16}/>:<Bookmark size={16}/>} {saved.includes("verse:"+selectedVerse.reference)?"Saved":"Save verse"}</button><span>{selectedVerse.theme}</span></div></div> :
-          <><div className="content-count">{filteredVerses.length} {scriptureSource === "database" ? "published Bible verses" : "featured passages"} <span>· {bookList.length} books listed below</span></div><div className="verse-list">{filteredVerses.map(v=><article className="verse-row" key={v.reference}><button className="verse-open" onClick={()=>setSelectedVerse(v)}><span className="verse-label">{v.theme.toUpperCase()}</span><strong>{v.reference}</strong><p>{v.text}</p><small>{v.translation} · {v.book} {v.chapter}:{v.verse}</small></button><button className={saved.includes("verse:"+v.reference)?"row-save saved":"row-save"} onClick={()=>toggleSave("verse:"+v.reference)} aria-label={"Save "+v.reference}><Bookmark size={17} fill={saved.includes("verse:"+v.reference)?"currentColor":"none"}/></button></article>)}</div><button className="outline-button book-toggle" onClick={()=>setShowBooks(v=>!v)}>{showBooks?"Hide book list":"Browse Bible books"} <ChevronRight size={16}/></button>{showBooks&&<div className="book-grid">{bookList.map((book,i)=><button key={book} onClick={()=>setQuery(book)}><span>{String(i+1).padStart(2,"0")}</span><strong>{book}</strong><ChevronRight size={16}/></button>)}</div>}</>}
+          <><div className="content-count">{filteredVerses.length} passages available <span>· {bookList.length} books listed below{scriptureSource === "database" ? " · database connected" : " · preview content"}</span></div><div className="verse-list">{filteredVerses.map(v=><article className="verse-row" key={v.reference}><button className="verse-open" onClick={()=>setSelectedVerse(v)}><span className="verse-label">{v.theme.toUpperCase()}</span><strong>{v.reference}</strong><p>{v.text}</p><small>{v.translation} · {v.book} {v.chapter}:{v.verse}</small></button><button className={saved.includes("verse:"+v.reference)?"row-save saved":"row-save"} onClick={()=>toggleSave("verse:"+v.reference)} aria-label={"Save "+v.reference}><Bookmark size={17} fill={saved.includes("verse:"+v.reference)?"currentColor":"none"}/></button></article>)}</div><button className="outline-button book-toggle" onClick={()=>setShowBooks(v=>!v)}>{showBooks?"Hide book list":"Browse Bible books"} <ChevronRight size={16}/></button>{showBooks&&<div className="book-grid">{bookList.map((book,i)=><button key={book} onClick={()=>setQuery(book)}><span>{String(i+1).padStart(2,"0")}</span><strong>{book}</strong><ChevronRight size={16}/></button>)}</div>}</>}
           <div className="library-note"><strong>Building the complete Bible library</strong><p>This preview contains selected passages, not the complete Bible text. The full book, chapter, and verse library will be connected after the source database and translation permissions are verified.</p></div>
         </div>}
 
