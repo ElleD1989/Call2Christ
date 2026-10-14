@@ -36,7 +36,7 @@ const hymns: Hymn[] = [
   { title: "It Is Well with My Soul", author: "Horatio G. Spafford", year: "1873", category: "Peace", lyrics: ["When peace, like a river, attendeth my way,", "When sorrows like sea billows roll;", "Whatever my lot, Thou hast taught me to say,", "It is well, it is well, with my soul."], note: "A hymn of trust and enduring faith through sorrow and hardship." },
 ];
 
-const prayers: Prayer[] = [
+const starterPrayers: Prayer[] = [
   { title: "Morning Prayer", category: "Daily devotion", scripture: "Psalm 143:8", text: "Heavenly Father, thank You for the gift of a new day. Guide my thoughts, words, and actions. Help me walk in love, show kindness to those I meet, and recognise Your goodness in ordinary moments. Let my life bring honour to You. Amen." },
   { title: "Prayer for Peace", category: "Peace & comfort", scripture: "Philippians 4:6–7", text: "Lord, quiet my heart when worry grows loud. Help me lay down what I cannot control and trust You with what lies ahead. Fill me with Your peace, steady my thoughts, and remind me that I am never beyond Your care. Amen." },
   { title: "Prayer of Gratitude", category: "Thanksgiving", scripture: "1 Thessalonians 5:18", text: "Gracious God, open my eyes to the blessings I might overlook. Thank You for life, for love, for the people who walk beside me, and for the hope found in Your Word. Teach me to live with a grateful heart, in every season. Amen." },
@@ -50,6 +50,7 @@ const bookList = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "J
 function App() {
   const [section, setSection] = useState<Section>("Home");
   const [verses, setVerses] = useState<Verse[]>(sampleVerses);
+  const [prayers, setPrayers] = useState<Prayer[]>(starterPrayers);
   const [scriptureSource, setScriptureSource] = useState<"sample" | "database">("sample");
   const [query, setQuery] = useState("");
   const [saved, setSaved] = useState<string[]>([]);
@@ -121,6 +122,40 @@ function App() {
     }
 
     void loadPublishedScripture();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const url = import.meta.env.VITE_SUPABASE_URL;
+    const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !publishableKey) return;
+
+    const client = createClient(url, publishableKey);
+    let cancelled = false;
+
+    async function loadPublishedPrayers() {
+      const { data, error } = await client
+        .from("content_items")
+        .select("slug, title, subtitle, excerpt, body")
+        .eq("content_type", "prayer")
+        .eq("status", "published")
+        .order("sort_order", { ascending: true });
+
+      if (error || !data || data.length === 0 || cancelled) return;
+
+      const published: Prayer[] = data.map(row => ({
+        title: row.title,
+        category: row.subtitle || "Prayer",
+        scripture: "Prayer",
+        text: row.body || row.excerpt || "",
+      }));
+
+      if (!cancelled && published.length > 0) setPrayers(published);
+    }
+
+    void loadPublishedPrayers();
     return () => {
       cancelled = true;
     };
