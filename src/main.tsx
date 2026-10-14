@@ -143,7 +143,7 @@ function App() {
     setSaved(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
   }
 
-  const dailyVerse = verses.find(v => v.reference === "Matthew 11:28") ?? verses[0] ?? sampleVerses[2];
+  const dailyVerse = verses.find(v => v.reference === "Matthew 11:28") ?? sampleVerses[2];
 
   return (
     <div className={dark ? "app dark" : "app"}>
